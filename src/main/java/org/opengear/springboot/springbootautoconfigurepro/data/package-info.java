@@ -1,1 +1,0 @@
-package org.opengear.springboot.springbootautoconfigurepro.data;

@@ -1,1 +1,1 @@
-rootProject.name = "springboot-autoconfigure-pro"
+rootProject.name = "spring-boot-autoconfigure-pro"

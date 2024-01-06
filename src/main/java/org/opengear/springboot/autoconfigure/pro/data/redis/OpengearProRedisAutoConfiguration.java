@@ -2,7 +2,7 @@ package org.opengear.springboot.autoconfigure.pro.data.redis;
 
 import io.lettuce.core.ClientOptions;
 import io.lettuce.core.cluster.ClusterClientOptions;
-import org.opengear.springboot.autoconfigure.pro.support.ValueSetter;
+import io.lettuce.core.cluster.ClusterTopologyRefreshOptions;
 import org.springframework.boot.autoconfigure.data.redis.LettuceClientConfigurationBuilderCustomizer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -29,12 +29,32 @@ public class OpengearProRedisAutoConfiguration {
         if (originClientOptions.isEmpty()) {
             return Optional.empty();
         }
-        ClusterClientOptions.Builder builder = ClusterClientOptions.builder(originClientOptions.get());
+        ClientOptions clientOptions = originClientOptions.get();
+        ClientOptions.Builder baseClientOptionsBuilder = ClientOptions.builder();
+        // set commons client options
 
-        ValueSetter.of()
-                .setIfValueNotNull(builder::decodeBufferPolicy, proRedisProperties.getLettuce().getDecodeBufferPolicy());
+        // set cluster options
+        if (clientOptions instanceof ClusterClientOptions && proRedisProperties.getLettuce().getCluster() != null) {
+            ClusterClientOptions.Builder builder = ClusterClientOptions.builder(baseClientOptionsBuilder.build());
+            ClusterClientOptions build = builder.build();
 
-        return Optional.of(builder.build());
+            TopologyRefreshOptionsMutableWrapper topologyRefreshOptionsMutableWrapper = TopologyRefreshOptionsMutableWrapper.builder(build.getTopologyRefreshOptions());
+            return Optional.of(builder.build());
+        }
+        return Optional.of(baseClientOptionsBuilder.build());
+    }
+
+    public static class TopologyRefreshOptionsMutableWrapper {
+        private ClusterTopologyRefreshOptions customTopologyRefreshOptions;
+
+        public static TopologyRefreshOptionsMutableWrapper builder(ClusterTopologyRefreshOptions customTopologyRefreshOptions) {
+            return null;
+        }
+
+        public ClusterTopologyRefreshOptions build() {
+            return ClusterTopologyRefreshOptions.builder().build();
+        }
+
     }
 
 }

@@ -10,7 +10,7 @@ plugins {
 	id("io.spring.dependency-management") version "1.1.4"
 }
 
-group = "org.opengear.springboot"
+group = "org.opengear.spring"
 version = "0.0.1-SNAPSHOT"
 
 java {

@@ -1,5 +1,5 @@
 import org.gradle.api.publish.maven.MavenPublication
-import org.gradle.plugins.signing.SigningExtension
+import java.util.*
 
 plugins {
 	// add maven plugin
@@ -62,6 +62,7 @@ publishing {
 	publications {
 		create<MavenPublication>("mavenJava") {
 			from(components["java"])
+			version = project.version.toString()
 
 			artifact(tasks["javadocJar"])
 			artifact(tasks["sourcesJar"])
@@ -96,12 +97,14 @@ publishing {
 	}
 
 	repositories {
+		val ossUsername = findProperty("oss.sonatype.username") as String
+		val ossPassword = findProperty("oss.sonatype.password") as String
 		maven {
 			name = "OSSRH"
 			url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
 			credentials {
-				username = "weian404"
-				password = "ossrhPassword"
+				username = ossUsername
+				password = ossPassword
 			}
 		}
 
@@ -109,14 +112,20 @@ publishing {
 			name = "OSSRHSnapshot"
 			url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
 			credentials {
-				username = "weian404"
-				password = "ossrhPassword"
+				username = ossUsername
+				password = ossPassword
 			}
 		}
 	}
 }
 
 signing {
+	val keyId: String = findProperty("org.opengear.signing.keyId") as String
+	val password: String = findProperty("org.opengear.signing.password") as String
+	val secretKeyBase64: String = findProperty("org.opengear.signing.secretKeyBase64") as String
+	val secretKey: String = String(Base64.getDecoder().decode(secretKeyBase64))
+
+	useInMemoryPgpKeys(keyId, secretKey, password)
 	sign(publishing.publications["mavenJava"])
 }
 
